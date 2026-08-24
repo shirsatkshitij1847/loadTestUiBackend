@@ -14,7 +14,10 @@ const app = express();
 
 // Load configuration from environment variables
 const SERVER_PORT = Number(process.env.PORT || process.env.SERVER_PORT || 3000);
-const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
+const CORS_ORIGINS = (process.env.CORS_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 const CACHE_TTL = (parseInt(process.env.CACHE_TTL_MINUTES) || 10) * 60 * 1000; // Convert minutes to milliseconds
 
 // In-memory cache for traces responses with TTL
@@ -44,7 +47,13 @@ function setCachedTraces(executionId, data) {
 
 app.use(
   cors({
-    origin: CORS_ORIGIN,
+    origin(origin, callback) {
+      if (!origin || CORS_ORIGINS.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS origin not allowed: ${origin}`));
+    },
   })
 );
 
@@ -155,6 +164,6 @@ app.get('/api/avilabletrace/:executionId', async (req,res)=>{
 app.listen(SERVER_PORT, () => {
   console.log(`Server running at http://localhost:${SERVER_PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-  console.log(`CORS Origin: ${CORS_ORIGIN}`);
+  console.log(`CORS Origins: ${CORS_ORIGINS.join(", ")}`);
   console.log(`Cache TTL: ${process.env.CACHE_TTL_MINUTES || 20} minutes`);
 });
