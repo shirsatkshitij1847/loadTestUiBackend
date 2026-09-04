@@ -4,11 +4,21 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-import { getAllTestsFromS3 } from "./getAllTestExecutionId.js";
-import { getTraceNames } from "./getAllFailedTraces.js";
-import { getFailedTraceViewers } from "./getFailedTraceViewers.js";
-import { getTestExecutionResult } from "./s3ResultCreationService.js";
-import { getTestMetaData } from "./testExecutionMetaData.js";
+import {
+  getAllTestsFromS3
+} from "./getAllTestExecutionId.js";
+import {
+  getTraceNames
+} from "./getAllFailedTraces.js";
+import {
+  getFailedTraceViewers
+} from "./getFailedTraceViewers.js";
+import {
+  getTestExecutionResult
+} from "./s3ResultCreationService.js";
+import {
+  getTestMetaData
+} from "./testExecutionMetaData.js";
 
 const app = express();
 
@@ -60,7 +70,9 @@ app.use(
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.json({ message: "working" });
+  res.json({
+    message: "working"
+  });
 });
 
 app.get("/api/getalltest", async (req, res) => {
@@ -80,10 +92,11 @@ app.get("/api/getalltest", async (req, res) => {
   }
 });
 
-
 app.get("/api/traces/:executionId", async (req, res) => {
   try {
-    const { executionId } = req.params;
+    const {
+      executionId
+    } = req.params;
 
     console.log("Getting traces for:", executionId);
 
@@ -121,19 +134,19 @@ app.get("/api/traces/:executionId", async (req, res) => {
   }
 });
 
+app.get("/api/getresult/:executionId", async (req, res) => {
 
-app.get("/api/getresult/:executionId",async (req,res)=>{
+  try {
 
-  try{
+    const {
+      executionId
+    } = req.params;
 
-    const { executionId } = req.params;
+    let data = await getTestExecutionResult(executionId);
 
-  let data = await getTestExecutionResult(executionId);
+    res.json(data);
 
-  res.json(data);
-
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error getting traces:", error);
 
     res.status(500).json({
@@ -142,23 +155,23 @@ app.get("/api/getresult/:executionId",async (req,res)=>{
       error: error.message,
     });
   }
-  
 
 })
 
-app.get('/api/avilabletrace/:executionId', async (req,res)=>{
+app.get('/api/avilabletrace/:executionId', async (req, res) => {
 
-
-  const { executionId } = req.params;
+  const {
+    executionId
+  } = req.params;
 
   const data = await getTraceNames(executionId);
   console.log(data);
 
   res.status(200).json({
-      success: true,
-      traces: data,
-    });
-  
+    success: true,
+    traces: data,
+  });
+
 })
 
 app.listen(SERVER_PORT, () => {
