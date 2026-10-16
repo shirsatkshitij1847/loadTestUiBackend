@@ -38,3 +38,15 @@ credentials
 
 # Local configuration
 config.local.*
+
+# Terraform local state and provider downloads
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+
+# Imported AWS configuration may contain sensitive resource attributes
+/aws-infrastructure/*.tf
+/aws-infrastructure/*.tf.json
